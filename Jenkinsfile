@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    COMPOSE_PROJECT_NAME = 'fashion_stack'
+    COMPOSE_PROJECT_NAME = 'fashion_web'
   }
 
   stages {
