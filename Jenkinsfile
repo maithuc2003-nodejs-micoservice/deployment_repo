@@ -11,7 +11,7 @@ pipeline {
         git url: 'https://github.com/maithuc2003-nodejs-micoservice/deployment_repo.git', branch: 'main'
       }
     }
-
+// https://github.com/maithuc2003-nodejs-micoservice/deployment_repo.git
     stage('Use Secret .env') {
       steps {
         withCredentials([file(credentialsId: 'ENV_FILE_KLTN_NODEJS', variable: 'ENV_PATH')]) {
@@ -23,6 +23,11 @@ pipeline {
       }
     }
   }
+//  configFileProvider([configFile(fileId: 'env_user_service', targetLocation: '.env')]) {
+//           bat '''
+//             docker-compose --env-file .env pull
+//             docker-compose --env-file .env up -d --remove-orphans
+//           '''
 
   post {
     success {
