@@ -14,7 +14,7 @@ pipeline {
 
     stage('Use Secret .env') {
       steps {
-        withCredentials([file(credentialsId: 'ENV_FILE', variable: 'ENV_PATH')]) {
+        withCredentials([file(credentialsId: 'ENV_FILE_KLTN_NODEJS', variable: 'ENV_PATH')]) {
           script {
             bat "docker-compose --env-file %ENV_PATH% -f docker-compose.yml down"
             bat "docker-compose --env-file %ENV_PATH% -f docker-compose.yml up -d --remove-orphans"
