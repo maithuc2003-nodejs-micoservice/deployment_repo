@@ -1,0 +1,178 @@
+version: "3.8"
+
+services:
+  api_gateway:
+    image: maithuc2003/api_gateway:latest
+    ports:
+      - "8000:8000"
+    depends_on:
+      - auth_service
+      - user_service
+      - post_service
+      - page_service
+      - image_service
+    environment:
+      - AUTH_SERVICE_URL=http://auth_service:3002
+      - USER_SERVICE_URL=http://user_service:3000
+      - POST_SERVICE_URL=http://post_service:3001
+      - PAGE_SERVICE_URL=http://page_service:3003
+      - IMAGE_SERVICE_URL=http://image_service:8082
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - backend
+    restart: always
+
+  user_service:
+    image: maithuc2003/user_service:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - user_db
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_HOST=${USER_DB_HOST}
+      - DB_PORT=3306
+      - DB_NAME=${USER_DB_NAME}
+    networks:
+      - backend
+    restart: always
+
+  post_service:
+    image: maithuc2003/post_service:latest
+    ports:
+      - "3001:3001"
+    depends_on:
+      - post_db
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_HOST=${POST_DB_HOST}
+      - DB_PORT=3306
+      - DB_NAME=${POST_DB_NAME}
+    networks:
+      - backend
+    restart: always
+
+  auth_service:
+    image: maithuc2003/auth_service:latest
+    ports:
+      - "3002:3002"
+    depends_on:
+      - auth_db
+      - user_service
+      - post_service
+    environment:
+      - USER_SERVICE_URL=http://user_service:3000
+      - POST_SERVICE_URL=http://post_service:3001
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_HOST=${AUTH_DB_HOST}
+      - DB_PORT=3306
+      - DB_NAME=${AUTH_DB_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+    networks:
+      - backend
+    restart: always
+
+  page_service:
+    image: maithuc2003/page_service:latest
+    ports:
+      - "3003:3003"
+    depends_on:
+      - page_db
+    environment:
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+      - DB_HOST=${PAGE_DB_HOST}
+      - DB_PORT=3306
+      - DB_NAME=${PAGE_DB_NAME}
+    networks:
+      - backend
+    restart: always
+
+  image_service:
+    image: maithuc2003/image_service:latest
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - backend
+    restart: always
+
+  frontend:
+    image: maithuc2003/frontend:latest
+    ports:
+      - "5173:80"
+    depends_on:
+      - user_service
+    networks:
+      - backend
+    restart: always
+
+  # ==================== Database Services ====================
+
+  user_db:
+    image: mysql:8.0
+    container_name: mysql-user-db
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${USER_DB_NAME}
+    volumes:
+      - ./backend/user_service/db-init:/docker-entrypoint-initdb.d
+      - ./db/user_db:/var/lib/mysql
+    networks:
+      - backend
+
+  post_db:
+    image: mysql:8.0
+    container_name: mysql-post-db
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${POST_DB_NAME}
+    volumes:
+      - ./backend/post_service/db-init:/docker-entrypoint-initdb.d
+      - ./db/post_db:/var/lib/mysql
+    networks:
+      - backend
+
+  auth_db:
+    image: mysql:8.0
+    container_name: mysql-auth-db
+    restart: always
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${AUTH_DB_NAME}
+    volumes:
+      - ./backend/auth_service/db-init:/docker-entrypoint-initdb.d
+      - ./db/auth_db:/var/lib/mysql
+    networks:
+      - backend
+
+  page_db:
+    image: mysql:8.0
+    container_name: mysql-page-db
+    restart: always
+    ports:
+      - "3309:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASS}
+      MYSQL_DATABASE: ${PAGE_DB_NAME}
+    volumes:
+      - ./backend/page_service/db-init:/docker-entrypoint-initdb.d
+      - ./db/page_db:/var/lib/mysql
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
