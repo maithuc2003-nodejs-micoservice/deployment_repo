@@ -101,16 +101,16 @@ services:
       - backend
     restart: always
 
-  frontend:
-    build:
-      context: ./../frontend
-    ports:
-      - "5173:80"
-    depends_on:
-      - user_service
-    networks:
-      - backend
-    restart: always
+  # frontend:
+  #   build:
+  #     context: ./../frontend
+  #   ports:
+  #     - "5173:80"
+  #   depends_on:
+  #     - user_service
+  #   networks:
+  #     - backend
+  #   restart: always
 
   # ==================== Database Services ====================
 
