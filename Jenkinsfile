@@ -17,8 +17,7 @@ pipeline {
         withCredentials([file(credentialsId: 'ENV_FILE_KLTN_NODEJS', variable: 'ENV_PATH')]) {
           script {
             bat "docker-compose --env-file %ENV_PATH% -f docker-compose.yml down"
-            bat "docker container prune -f"
-            bat "docker-compose --env-file %ENV_PATH% -f docker-compose.yml up -d --remove-orphans"
+            bat "docker-compose --env-file %ENV_PATH% -f docker-compose.yml up -d --build"
           }
         }
       }
